@@ -1,7 +1,27 @@
 # -*- coding: utf-8 -*-
 import unittest
+import pytest
 
 from gilded_rose import Item, GildedRose
+
+
+@pytest.mark.parametrize("input_item", ["generic item", "Aged Brie", "Backstage passes to a TAFKAL80ETC concert", "Conjured"])
+def test_sell_in_decreases(input_item):
+    items = [Item("input_item", 8, 10)]
+    sut = GildedRose(items)
+
+    sut.update_quality()
+
+    assert 7 == items[0].sell_in
+
+@pytest.mark.parametrize("input_item", ["generic item", "Aged Brie", "Backstage passes to a TAFKAL80ETC concert", "Conjured"])
+def test_sell_in_can_be_negative(input_item):
+    items = [Item("input_item", 0, 25)]
+    sut = GildedRose(items)
+
+    sut.update_quality()
+
+    assert -1 == items[0].sell_in
 
 
 class GildedRoseTest(unittest.TestCase):
@@ -31,56 +51,6 @@ class GildedRoseTest(unittest.TestCase):
         sut.update_quality()
 
         self.assertEqual(80, items[0].quality)
-
-    # TODO - convert next 3 tests to 1 parametrized test
-    def test_sell_in_decreases_generic_item(self):
-        items = [Item("generic item", 8, 10)]
-        sut = GildedRose(items)
-
-        sut.update_quality()
-
-        self.assertEqual(7, items[0].sell_in)
-
-    def test_sell_in_decreases_brie(self):
-        items = [Item("Aged Brie", 8, 10)]
-        sut = GildedRose(items)
-
-        sut.update_quality()
-
-        self.assertEqual(7, items[0].sell_in)
-
-    def test_sell_in_decreases_backstage_pass(self):
-        items = [Item("Backstage passes to a TAFKAL80ETC concert", 8, 10)]
-        sut = GildedRose(items)
-
-        sut.update_quality()
-
-        self.assertEqual(7, items[0].sell_in)
-
-    # TODO - convert next 3 tests to 1 parametrized test
-    def test_sell_in_can_be_negative_generic_item(self):
-        items = [Item("generic item", 0, 25)]
-        sut = GildedRose(items)
-
-        sut.update_quality()
-
-        self.assertEqual(-1, items[0].sell_in)
-
-    def test_sell_in_can_be_negative_brie(self):
-        items = [Item("Aged Brie", 0, 25)]
-        sut = GildedRose(items)
-
-        sut.update_quality()
-
-        self.assertEqual(-1, items[0].sell_in)
-
-    def test_sell_in_can_be_negative_backstage_pass(self):
-        items = [Item("Backstage passes to a TAFKAL80ETC concert", 0, 25)]
-        sut = GildedRose(items)
-
-        sut.update_quality()
-
-        self.assertEqual(-1, items[0].sell_in)
 
     def test_generic_item_quality_decreases_before_sell_by(self):
         items = [Item("generic item", 5, 10)]
@@ -195,6 +165,27 @@ class GildedRoseTest(unittest.TestCase):
 
         self.assertEqual(0, items[0].sell_in)
         self.assertEqual(9, items[1].sell_in)
+
+    def test_conjured_item_quality_decreases_twice_as_fast_as_generic_item(self):
+        items = [Item("Conjured", 2, 10),
+                 Item("generic item", 2, 10)]
+        sut = GildedRose(items)
+
+        sut.update_quality()
+
+        self.assertEqual(8, items[0].quality)
+        self.assertEqual(9, items[1].quality)
+    
+    def test_conjured_item_quality_decreases_twice_as_fast_as_generic_item_after_sell_by(self):
+        items = [Item("Conjured", 0, 10),
+                 Item("generic item", 0, 10)]
+        sut = GildedRose(items)
+
+        sut.update_quality()
+
+        self.assertEqual(6, items[0].quality)
+        self.assertEqual(8, items[1].quality)
+
 
 if __name__ == '__main__':
     unittest.main()
